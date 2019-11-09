@@ -76,7 +76,7 @@ public class HttpRequest {
         if (parameterMap.containsKey(parameter)) {
             return parameterMap.get(parameter);
         }
-        return null;
+        return "";
     }
 
     public String getAction() {
