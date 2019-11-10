@@ -1,6 +1,12 @@
 package rawHttpServer;
 
+import hotelapp.HotelData;
+import hotelapp.HotelDataDriver;
+import hotelapp.ThreadSafeHotelData;
+import rawHttpServer.handlers.AttractionsHandler;
+
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -19,17 +25,33 @@ public class RawSocketHotelServer {
     public static final String EOT = "EOT";
     public static final String EXIT = "SHUTDOWN";
 
+    private Map<String, String> handlers; // maps each url path to the appropriate handler
+
     private volatile boolean isShutdown = false;
 
+    public static ThreadSafeHotelData hotelData;
+
+
+    public RawSocketHotelServer() {
+
+        handlers = new HashMap<>();
+        handlers.put("attractions", "AttractionsHandler");
+        handlers.put("hotelInfo", "HotelHandler");
+        handlers.put("reviews", "ReviewsHandler");
+
+    }
 
     public static void main(String[] args) {
+        // prepare hotel data
+        HotelDataDriver hotelDataDriver = new HotelDataDriver();
+        hotelData = hotelDataDriver.getHotelData();
         new RawSocketHotelServer().startServer();
     }
 
 
     public void startServer() {
-        final ExecutorService threads = Executors.newFixedThreadPool(4);
 
+        final ExecutorService threads = Executors.newFixedThreadPool(4);
         Runnable serverTask = new Runnable() {
             @Override
             public void run() {
@@ -66,9 +88,40 @@ public class RawSocketHotelServer {
         public void run() {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                PrintWriter outPutPrintWriter = new PrintWriter(clientSocket.getOutputStream());
+
                 while (!clientSocket.isClosed()) {
                     String httpRequestString = reader.readLine();
                     HttpRequest httpRequest = new HttpRequest(httpRequestString);
+
+                    if (!"GET".equals(httpRequest.getHttpCRUD())) {
+                        // TODO return 405 Method Not Allowed
+                    }
+
+                    // deal with http query path
+
+                    // call handler
+                    if (!handlers.containsKey(httpRequest.getAction())) {
+                        // TODO return 405 method not allowed
+                    }
+                    try {
+                        Class c = Class.forName(handlers.get(httpRequest.getAction()));
+                        HttpHandler httpHandler = (HttpHandler) c.newInstance();
+                        httpHandler.processRequest(httpRequest, outPutPrintWriter);
+
+                    } catch (ClassNotFoundException e) {
+                        // MUST FIND CLASS
+                    } catch (InstantiationException e) {
+                        //
+                    } catch (IllegalAccessException e) {
+                        //
+                    }
+
+
+                    // TODO return client socket(out put printer)
+
+
                 }
             } catch (IOException e) {
                 System.out.println(e);
