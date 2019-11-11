@@ -1,20 +1,17 @@
 package rawHttpServer;
 
+import exceptions.HttpRequestParingException;
 import hotelapp.HotelData;
 import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
-import rawHttpServer.handlers.AttractionsHandler;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Implements an http server using raw sockets
@@ -60,6 +57,7 @@ public class RawSocketHotelServer {
                     System.out.println("Waiting for clients to connect...");
                     while (!isShutdown) {
                         Socket clientSocket = welcomingSocket.accept();
+                        System.out.println("Connecting Successful");
                         threads.submit(new RequestWorker(clientSocket));
                     }
                     if (isShutdown) {
@@ -89,21 +87,32 @@ public class RawSocketHotelServer {
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                PrintWriter outPutPrintWriter = new PrintWriter(clientSocket.getOutputStream());
+                PrintWriter outPutPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
                 while (!clientSocket.isClosed()) {
                     String httpRequestString = reader.readLine();
-                    HttpRequest httpRequest = new HttpRequest(httpRequestString);
-
-                    if (!"GET".equals(httpRequest.getHttpCRUD())) {
-                        // TODO return 405 Method Not Allowed
+                    HttpRequest httpRequest = null;
+                    try {
+                        httpRequest = new HttpRequest(httpRequestString);
+                    } catch (HttpRequestParingException e) {
+                        outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
+                        outPutPrintWriter.flush();
+                        System.out.println("parsing error");
+                        return;
                     }
 
-                    // deal with http query path
+                    if (!"GET".equals(httpRequest.getHttpCRUD())) {
+                        // return 405 Method Not Allowed
+                        outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
+                        System.out.println("405 Method Not Allowed");
+                        outPutPrintWriter.flush();
+                        return;
+                    }
 
-                    // call handler
                     if (!handlers.containsKey(httpRequest.getAction())) {
-                        // TODO return 405 method not allowed
+                        outPutPrintWriter.println("HTTP/1.1 404 Page Not Found");
+                        System.out.println("404 Page Not Found");
+                        outPutPrintWriter.flush();
                     }
                     try {
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
@@ -117,10 +126,6 @@ public class RawSocketHotelServer {
                     } catch (IllegalAccessException e) {
                         //
                     }
-
-
-                    // TODO return client socket(out put printer)
-
 
                 }
             } catch (IOException e) {
