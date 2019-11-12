@@ -109,15 +109,17 @@ public class RawSocketHotelServer {
                         return;
                     }
 
-                    if (!handlers.containsKey(httpRequest.getAction())) {
+                    if (!handlers.containsKey(httpRequest.getAction().replace("/", ""))) {
                         outPutPrintWriter.println("HTTP/1.1 404 Page Not Found");
                         System.out.println("404 Page Not Found");
+                        System.out.println(httpRequest.getAction());
                         outPutPrintWriter.flush();
                     }
                     try {
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
                         HttpHandler httpHandler = (HttpHandler) c.newInstance();
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
+                        outPutPrintWriter.flush();
 
                     } catch (ClassNotFoundException e) {
                         // MUST FIND CLASS
