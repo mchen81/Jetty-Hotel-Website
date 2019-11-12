@@ -2,7 +2,6 @@ package hotelapp;
 
 import hotelapp.bean.Hotel;
 import hotelapp.bean.Review;
-import hotelapp.bean.TouristAttraction;
 import hotelapp.exceptions.InvalidRatingException;
 import hotelapp.exceptions.NoHotelFoundException;
 import hotelapp.exceptions.ParseException;
@@ -22,8 +21,6 @@ public class HotelData {
 
     protected Map<String, String> aboutThisArea;
 
-    protected Map<String, List<TouristAttraction>> touristAttractionMap;
-
 
     /**
      * Default Constructor
@@ -33,12 +30,8 @@ public class HotelData {
         reviewsBook = new HashMap<>();
         hotels = new TreeSet<>((o1, o2) -> o1.compareTo(o2));
         aboutThisArea = new HashMap<>();
-        touristAttractionMap = new HashMap<>();
     }
 
-    public void clearAttractions() {
-        touristAttractionMap = new HashMap<>();
-    }
 
     /**
      * @param hotelId hotel id
@@ -48,28 +41,6 @@ public class HotelData {
         return hotelsBook.containsKey(hotelId);
     }
 
-    /**
-     * put attractions into map
-     *
-     * @param hotelId            hotel id
-     * @param touristAttractions a list of TouristAttraction
-     */
-    public void putAttractions(String hotelId, List<TouristAttraction> touristAttractions) {
-        touristAttractionMap.put(hotelId, touristAttractions);
-    }
-
-    /**
-     * get a list of attractions by hotel id
-     *
-     * @param hotelId hotel id
-     * @return a list of attractions
-     */
-    public List<TouristAttraction> getAttractions(String hotelId) {
-        if (!hotelsBook.containsKey(hotelId)) {
-            throw new NoHotelFoundException();
-        }
-        return touristAttractionMap.containsKey(hotelId) ? touristAttractionMap.get(hotelId) : null;
-    }
 
     /**
      * Create a Hotel given the hotel object, and add it to the appropriate data

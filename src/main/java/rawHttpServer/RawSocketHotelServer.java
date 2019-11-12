@@ -32,9 +32,9 @@ public class RawSocketHotelServer {
     public RawSocketHotelServer() {
 
         handlers = new HashMap<>();
-        handlers.put("attractions", "AttractionsHandler");
+        handlers.put("attractions", "rawHttpServer.handlers.AttractionsHandler");
         handlers.put("hotelInfo", "rawHttpServer.handlers.HotelHandler");
-        handlers.put("reviews", "ReviewsHandler");
+        handlers.put("reviews", "rawHttpServer.handlers.ReviewsHandler");
 
     }
 
@@ -84,11 +84,10 @@ public class RawSocketHotelServer {
 
         @Override
         public void run() {
+
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
                 PrintWriter outPutPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
                 while (!clientSocket.isClosed()) {
                     String httpRequestString = reader.readLine();
                     HttpRequest httpRequest = null;
@@ -96,15 +95,16 @@ public class RawSocketHotelServer {
                         httpRequest = new HttpRequest(httpRequestString);
                     } catch (HttpRequestParingException e) {
                         outPutPrintWriter.println("HTTP/1.1 400 Bad Request");
+                        System.out.println("HTTP/1.1 400 Bad Request: " + e);
                         outPutPrintWriter.flush();
-                        System.out.println("HTTP/1.1 400 Bad Request");
                         return;
                     }
 
+                    // examine GET
                     if (!"GET".equals(httpRequest.getHttpCRUD())) {
                         // return 405 Method Not Allowed
                         outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
-                        System.out.println("405 Method Not Allowed");
+                        System.out.println("405 Method Not Allowed: " + httpRequest.getAction());
                         outPutPrintWriter.flush();
                         return;
                     }

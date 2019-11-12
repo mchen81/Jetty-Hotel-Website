@@ -4,7 +4,6 @@ package hotelapp;
 import customLock.ReentrantReadWriteLock;
 import hotelapp.bean.Hotel;
 import hotelapp.bean.Review;
-import hotelapp.bean.TouristAttraction;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -219,48 +218,6 @@ public class ThreadSafeHotelData extends HotelData {
         try {
             lock.lockRead();
             return super.hasHotel(hotelId);
-        } finally {
-            lock.unlockRead();
-        }
-    }
-
-    @Override
-    public void clearAttractions() {
-        try {
-            lock.lockWrite();
-            super.clearAttractions();
-        } finally {
-            lock.unlockWrite();
-        }
-    }
-
-    /**
-     * put attractions into map
-     *
-     * @param hotelId            hotel id
-     * @param touristAttractions a list of TouristAttraction
-     */
-    @Override
-    public void putAttractions(String hotelId, List<TouristAttraction> touristAttractions) {
-        try {
-            lock.lockWrite();
-            super.putAttractions(hotelId, touristAttractions);
-        } finally {
-            lock.unlockWrite();
-        }
-    }
-
-    /**
-     * get a list of attractions by hotel id
-     *
-     * @param hotelId hotel id
-     * @return a list of attractions
-     */
-    @Override
-    public List<TouristAttraction> getAttractions(String hotelId) {
-        try {
-            lock.lockRead();
-            return super.getAttractions(hotelId);
         } finally {
             lock.unlockRead();
         }

@@ -30,7 +30,7 @@ public class HttpRequest {
     }
 
     private void parseHttpRequest() {
-        Pattern requestPattern = Pattern.compile("([A-Za-z]*?) (.*) (\\/HTTP\\/1.1?)");
+        Pattern requestPattern = Pattern.compile("([A-Za-z]*?) (.*) (\\/?HTTP\\/1.1?)");
         Matcher requestMatcher = requestPattern.matcher(httpRequest);
 
         if (requestMatcher.find()) {
@@ -38,7 +38,7 @@ public class HttpRequest {
             urlRequest = requestMatcher.group(2);
             parseUrlRequest();
         } else {
-            throw new HttpRequestParingException();
+            throw new HttpRequestParingException("Cannot Parse HTTP Request");
         }
 
     }
@@ -53,7 +53,7 @@ public class HttpRequest {
             String parameters = urlMatcher.group(2);
             parseParametersToMap(parameters);
         } else {
-            throw new HttpRequestParingException();
+            throw new HttpRequestParingException("Cannot Parse Action");
         }
 
     }
@@ -65,18 +65,22 @@ public class HttpRequest {
             try {
                 parameterMap.put(map[0], map[1]);
             } catch (IndexOutOfBoundsException e) {
-                throw new HttpRequestParingException();
+                throw new HttpRequestParingException("Cannot parse query request");
             }
 
         }
     }
 
 
-    public String getValue(String parameter) {
-        if (parameterMap.containsKey(parameter)) {
-            return parameterMap.get(parameter);
+    public String getValue(String parameterKey) {
+        if (parameterMap.containsKey(parameterKey)) {
+            return parameterMap.get(parameterKey);
         }
         return "";
+    }
+
+    public boolean containsKey(String parameterKey) {
+        return parameterMap.containsKey(parameterKey);
     }
 
     public String getAction() {

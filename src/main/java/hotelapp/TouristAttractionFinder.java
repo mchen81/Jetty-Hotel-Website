@@ -1,9 +1,7 @@
 package hotelapp;
 
-import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import hotelapp.bean.Hotel;
-import hotelapp.bean.TouristAttraction;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -11,8 +9,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Class responsible for getting tourist attractions near each hotel from the Google Places API.
@@ -48,36 +44,10 @@ public class TouristAttractionFinder {
      * get Attractions info. Adds attractions to the corresponding data structure that supports
      * efficient search for tourist attractions given the hotel id.
      */
-    public void fetchAttractions(int radiusInMiles) {
-        // This method should call getRequest method
-        hdata.clearAttractions();
-        for (String hotelId : hdata.getHotels()) {
-            Hotel hotel = hdata.getHotelInstance(hotelId);
-            String urlString = createQueryURL(hotel.getCity(), hotel.getLatitude(), hotel.getLongitude(), convertMilesToMeters(radiusInMiles));
-            hdata.putAttractions(hotelId, parseUrlToAttractions(urlString));
-        }
-    }
-
-    /**
-     * Print attractions near the hotels to a file.
-     * The format is described in the project description.
-     *
-     * @param filename
-     */
-    public void printAttractions(Path filename) {
-        try (PrintWriter pw = new PrintWriter(filename.toFile())) {
-            for (String hotelId : hdata.getHotels()) {
-                Hotel hotel = hdata.getHotelInstance(hotelId);
-                pw.printf("Attractions near %s, %s\n", hotelId, hotel.getName());
-                for (TouristAttraction touristAttraction : hdata.getAttractions(hotelId)) {
-                    pw.println(touristAttraction);
-                }
-                pw.println("\n++++++++++++++++++++");
-            }
-            pw.close();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getCause());
-        }
+    public String fetchAttractions(String hotelId, int radiusInMiles) {
+        Hotel hotel = hdata.getHotelInstance(hotelId);
+        String urlString = createQueryURL(hotel.getCity(), hotel.getLatitude(), hotel.getLongitude(), convertMilesToMeters(radiusInMiles));
+        return getGoogleMapJson(urlString);
     }
 
 
@@ -132,7 +102,7 @@ public class TouristAttractionFinder {
      *
      * @param urlString
      */
-    private List<TouristAttraction> parseUrlToAttractions(String urlString) {
+    private String getGoogleMapJson(String urlString) {
         //System.out.println(urlString);
         URL url;
         PrintWriter out = null;
@@ -163,9 +133,7 @@ public class TouristAttractionFinder {
                     jsonData.append(line);
                 }
             }
-            //  jsonReader starts from tourist attraction array, parse the jsonReader to an array of TouristAttraction
-            TouristAttraction[] touristAttractionArray = parseJsonToTouristAttractions(jsonData.toString());
-            return Arrays.asList(touristAttractionArray);
+            return jsonData.toString();
         } catch (IOException e) {
             throw new IllegalArgumentException(
                     "An IOException occured while writing to the socket stream or reading from the stream: " + e);
@@ -183,28 +151,6 @@ public class TouristAttractionFinder {
         }
     }
 
-    /**
-     * parse jsonData of String to an array of TouristAttraction
-     *
-     * @param jsonData JsonData in String
-     * @return an array of TouristAttractions
-     * @throws IOException
-     */
-    private TouristAttraction[] parseJsonToTouristAttractions(String jsonData) throws IOException {
-        //---------parse json data to gson
-        Gson gson = new Gson();
-        JsonReader jsonReader = new JsonReader(new StringReader(jsonData)); // read the json data from html
-        jsonReader.beginObject();
-        while (jsonReader.hasNext()) { // start the jsonReader from "results", the value of results is an json array
-            String basicInfo = jsonReader.nextName();
-            if (basicInfo.equals("results")) {
-                break;
-            } else {
-                jsonReader.skipValue();
-            }
-        }
-        return gson.fromJson(jsonReader, TouristAttraction[].class);
-    }
 
     /**
      * parse Google API key in config file
