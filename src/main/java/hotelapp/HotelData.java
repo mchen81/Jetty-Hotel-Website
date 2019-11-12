@@ -277,4 +277,16 @@ public class HotelData {
     public Hotel getHotelInstance(String hotelId) {
         return hotelsBook.get(hotelId);
     }
+
+    /**
+     * @param hotelId
+     * @return
+     */
+    public List<Review> getReviews(String hotelId) {
+        if (reviewsBook.containsKey(hotelId)) {
+            return new ArrayList<>(reviewsBook.get(hotelId));
+        } else {
+            return null;
+        }
+    }
 }

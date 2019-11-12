@@ -265,4 +265,14 @@ public class ThreadSafeHotelData extends HotelData {
             lock.unlockRead();
         }
     }
+
+    @Override
+    public List<Review> getReviews(String hotelId) {
+        try {
+            lock.lockRead();
+            return super.getReviews(hotelId);
+        } finally {
+            lock.unlockRead();
+        }
+    }
 }
