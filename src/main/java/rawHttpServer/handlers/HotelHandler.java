@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class HotelHandler implements HttpHandler {
+
     @Override
     public void processRequest(HttpRequest request, PrintWriter writer) {
         ThreadSafeHotelData hotelData = RawSocketHotelServer.hotelData;
@@ -34,6 +35,8 @@ public class HotelHandler implements HttpHandler {
                 jsonWriter.name("lng").value(hotel.getLongitude().toString());
             }
             jsonWriter.endObject();
+            writer.println();
+
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot process Hotel Info");
         }

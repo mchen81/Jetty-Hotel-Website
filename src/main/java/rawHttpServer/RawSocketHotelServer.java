@@ -33,7 +33,7 @@ public class RawSocketHotelServer {
 
         handlers = new HashMap<>();
         handlers.put("attractions", "AttractionsHandler");
-        handlers.put("hotelInfo", "HotelHandler");
+        handlers.put("hotelInfo", "rawHttpServer.handlers.HotelHandler");
         handlers.put("reviews", "ReviewsHandler");
 
     }
@@ -95,9 +95,9 @@ public class RawSocketHotelServer {
                     try {
                         httpRequest = new HttpRequest(httpRequestString);
                     } catch (HttpRequestParingException e) {
-                        outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
+                        outPutPrintWriter.println("HTTP/1.1 400 Bad Request");
                         outPutPrintWriter.flush();
-                        System.out.println("parsing error");
+                        System.out.println("HTTP/1.1 400 Bad Request");
                         return;
                     }
 
@@ -119,16 +119,12 @@ public class RawSocketHotelServer {
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
                         HttpHandler httpHandler = (HttpHandler) c.newInstance();
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
+                        outPutPrintWriter.println();
                         outPutPrintWriter.flush();
-
-                    } catch (ClassNotFoundException e) {
-                        // MUST FIND CLASS
-                    } catch (InstantiationException e) {
-                        //
-                    } catch (IllegalAccessException e) {
-                        //
+                        System.out.println("Success");
+                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                        System.out.println(e);
                     }
-
                 }
             } catch (IOException e) {
                 System.out.println(e);
