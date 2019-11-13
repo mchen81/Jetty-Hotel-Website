@@ -1,5 +1,6 @@
 package rawHttpServer.handlers;
 
+import hotelapp.HotelDataDriver;
 import hotelapp.TouristAttractionFinder;
 import rawHttpServer.HttpHandler;
 import rawHttpServer.HttpRequest;
@@ -11,7 +12,7 @@ public class AttractionsHandler implements HttpHandler {
     @Override
     public void processRequest(HttpRequest request, PrintWriter writer) {
 
-        TouristAttractionFinder touristAttractionFinder = new TouristAttractionFinder(RawSocketHotelServer.hotelData);
+        TouristAttractionFinder touristAttractionFinder = new TouristAttractionFinder(HotelDataDriver.hotelData);
         String hotelId = request.getValue("hotelId");
         int radius = Integer.parseInt(request.getValue("radius"));
         System.out.println(touristAttractionFinder.fetchAttractions(hotelId, radius));

@@ -30,7 +30,7 @@ public class HttpRequest {
     }
 
     private void parseHttpRequest() {
-        Pattern requestPattern = Pattern.compile("([A-Za-z]*?) (.*) (\\/?HTTP\\/1.1?)");
+        Pattern requestPattern = Pattern.compile("([A-Za-z]*?) (.*) (\\/?HTTP\\/1.1.*)");
         Matcher requestMatcher = requestPattern.matcher(httpRequest);
 
         if (requestMatcher.find()) {
@@ -38,7 +38,7 @@ public class HttpRequest {
             urlRequest = requestMatcher.group(2);
             parseUrlRequest();
         } else {
-            throw new HttpRequestParingException("Cannot Parse HTTP Request");
+            throw new HttpRequestParingException("Cannot Parse HTTP Request" + httpRequest);
         }
 
     }

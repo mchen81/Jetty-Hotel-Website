@@ -1,6 +1,7 @@
 package rawHttpServer.handlers;
 
 import com.google.gson.stream.JsonWriter;
+import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
 import hotelapp.bean.Review;
 import rawHttpServer.HttpHandler;
@@ -16,7 +17,7 @@ import java.util.List;
 public class ReviewsHandler implements HttpHandler {
     @Override
     public void processRequest(HttpRequest request, PrintWriter writer) {
-        ThreadSafeHotelData hotelData = RawSocketHotelServer.hotelData;
+        ThreadSafeHotelData hotelData = HotelDataDriver.hotelData;
 
         String hotelId = request.getValue("hotelId");
         int numbersOfReview = Integer.parseInt(request.getValue("num"));

@@ -1,6 +1,7 @@
 package rawHttpServer.handlers;
 
 import com.google.gson.stream.JsonWriter;
+import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
 import hotelapp.bean.Hotel;
 import rawHttpServer.HttpHandler;
@@ -14,7 +15,7 @@ public class HotelHandler implements HttpHandler {
 
     @Override
     public void processRequest(HttpRequest request, PrintWriter writer) {
-        ThreadSafeHotelData hotelData = RawSocketHotelServer.hotelData;
+        ThreadSafeHotelData hotelData = HotelDataDriver.hotelData;
 
         Hotel hotel = hotelData.getHotelInstance(request.getValue("hotelId"));
 
@@ -40,7 +41,6 @@ public class HotelHandler implements HttpHandler {
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot process Hotel Info");
         }
-
     }
 
 }

@@ -1,13 +1,12 @@
 package rawHttpServer;
 
 import exceptions.HttpRequestParingException;
-import hotelapp.HotelData;
-import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -26,9 +25,6 @@ public class RawSocketHotelServer {
 
     private volatile boolean isShutdown = false;
 
-    public static ThreadSafeHotelData hotelData;
-
-
     public RawSocketHotelServer() {
 
         handlers = new HashMap<>();
@@ -38,16 +34,7 @@ public class RawSocketHotelServer {
 
     }
 
-    public static void main(String[] args) {
-        // prepare hotel data
-        HotelDataDriver hotelDataDriver = new HotelDataDriver();
-        hotelData = hotelDataDriver.getHotelData();
-        new RawSocketHotelServer().startServer();
-    }
-
-
-    public void startServer() {
-
+    public void startServer(ThreadSafeHotelData hotelData) {
         final ExecutorService threads = Executors.newFixedThreadPool(4);
         Runnable serverTask = new Runnable() {
             @Override
@@ -66,7 +53,10 @@ public class RawSocketHotelServer {
                 } catch (IOException e) {
                     System.err.println("Unable to process client request");
                     e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println(e);
                 }
+
             }
         };
         Thread serverThread = new Thread(serverTask);
@@ -87,7 +77,7 @@ public class RawSocketHotelServer {
 
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter outPutPrintWriter = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                PrintWriter outPutPrintWriter = new PrintWriter(clientSocket.getOutputStream());
                 while (!clientSocket.isClosed()) {
                     String httpRequestString = reader.readLine();
                     HttpRequest httpRequest = null;
@@ -100,7 +90,6 @@ public class RawSocketHotelServer {
                         return;
                     }
 
-                    // examine GET
                     if (!"GET".equals(httpRequest.getHttpCRUD())) {
                         // return 405 Method Not Allowed
                         outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
@@ -114,16 +103,24 @@ public class RawSocketHotelServer {
                         System.out.println("404 Page Not Found");
                         System.out.println(httpRequest.getAction());
                         outPutPrintWriter.flush();
+                        return;
                     }
                     try {
+                        System.out.println("HI");
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
                         HttpHandler httpHandler = (HttpHandler) c.newInstance();
+                        outPutPrintWriter.print("HTTP/1.1 200 \r\n"); // Version & status code
+                        outPutPrintWriter.print("Content-Type: application/json\r\n"); // The type of data
+                        outPutPrintWriter.print("Connection: close\r\n"); // Will close stream
+                        outPutPrintWriter.print("\r\n"); // End of headers
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
                         outPutPrintWriter.println();
                         outPutPrintWriter.flush();
                         System.out.println("Success");
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                         System.out.println(e);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             } catch (IOException e) {
