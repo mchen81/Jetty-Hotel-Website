@@ -3,8 +3,8 @@ package jettyServer;
 import com.google.gson.stream.JsonWriter;
 import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
-import hotelapp.bean.Hotel;
 import hotelapp.bean.Review;
+import org.apache.commons.text.StringEscapeUtils;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public class ReviewsServlet extends HttpServlet {
@@ -24,7 +23,15 @@ public class ReviewsServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter out = response.getWriter();
         String hotelID = request.getParameter("hotelId");
-        int numbersOfReview = Integer.parseInt(request.getParameter("num"));
+        hotelID = hotelID == null ? "-1" : StringEscapeUtils.escapeHtml4(hotelID);
+
+        int numbersOfReview = 0;
+        try {
+            numbersOfReview = Integer.parseInt(request.getParameter("num"));
+        } catch (NumberFormatException e) {
+            numbersOfReview = 0;
+        }
+
         List<Review> reviews = hotelData.getReviews(hotelID);
         JsonWriter jsonWriter = new JsonWriter(out);
 

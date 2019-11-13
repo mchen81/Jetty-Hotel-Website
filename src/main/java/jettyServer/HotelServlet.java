@@ -4,8 +4,8 @@ import com.google.gson.stream.JsonWriter;
 import hotelapp.HotelDataDriver;
 import hotelapp.ThreadSafeHotelData;
 import hotelapp.bean.Hotel;
+import org.apache.commons.text.StringEscapeUtils;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +21,8 @@ public class HotelServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         PrintWriter out = response.getWriter();
         String hotelID = request.getParameter("hotelId");
+        hotelID = hotelID == null ? "-1" : StringEscapeUtils.escapeHtml4(hotelID);
+
         Hotel hotel = hotelData.getHotelInstance(hotelID);
 
         JsonWriter jsonWriter = new JsonWriter(out);
