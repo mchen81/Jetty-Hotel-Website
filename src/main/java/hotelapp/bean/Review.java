@@ -5,6 +5,8 @@ import hotelapp.exceptions.ParseException;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class Review implements Comparable<Review> {
@@ -21,7 +23,7 @@ public class Review implements Comparable<Review> {
 
     private String userNickname = "Anonymous";
 
-    private Date submissionTime;
+    private LocalDateTime submissionTime;
 
     private boolean isRecommended;
 
@@ -80,23 +82,20 @@ public class Review implements Comparable<Review> {
         }
     }
 
-    public Date getSubmissionTime() {
+    public LocalDateTime getSubmissionTime() {
         return submissionTime;
     }
 
     public void setSubmissionTime(String submissionTime) throws ParseException {
         try {
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            this.submissionTime = formatter.parse(submissionTime);
-        } catch (java.text.ParseException e) {
-            throw new ParseException();
-        } catch (NumberFormatException e) {
+            this.submissionTime = LocalDateTime.parse(submissionTime, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (Exception e) {
             System.out.println(submissionTime);
             throw new ParseException();
         }
     }
 
-    public void setSubmissionTime(Date submissionTime) {
+    public void setSubmissionTime(LocalDateTime submissionTime) {
         this.submissionTime = submissionTime;
     }
 

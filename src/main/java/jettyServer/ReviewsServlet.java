@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -36,17 +37,21 @@ public class ReviewsServlet extends HttpServlet {
                 jsonWriter.name("success").value(true);
                 jsonWriter.name("hotelId").value(hotelID);
                 jsonWriter.name("reviews").beginArray();
-                for (int i = 0; i < numbersOfReview; i++) {
+                for (int i = 0; i < numbersOfReview && i < reviews.size(); i++) {
                     Review review = reviews.get(i);
-                    Date reviewDate = review.getSubmissionTime();
+                    LocalDateTime reviewDate = review.getSubmissionTime();
+                    String month = String.valueOf(reviewDate.getMonth().getValue());
+                    month = month.length() == 1 ? "0" + month : month;
+                    String day = String.valueOf(reviewDate.getDayOfMonth());
+                    day = day.length() == 1 ? "0" + day : day;
+                    String year = String.valueOf(reviewDate.getYear()).substring(2, 4);
 
                     jsonWriter.beginObject();
-
                     jsonWriter.name("reviewId").value(review.getReviewId());
                     jsonWriter.name("title").value(review.getTitle());
                     jsonWriter.name("user").value(review.getUserNickname());
                     jsonWriter.name("reviewText").value(review.getReviewText());
-                    jsonWriter.name("date").value(reviewDate.toString());
+                    jsonWriter.name("date").value(String.format("%s:%s:%s", month, day, year));
                     jsonWriter.endObject();
 
                 }

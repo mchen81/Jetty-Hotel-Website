@@ -6,7 +6,6 @@ import hotelapp.ThreadSafeHotelData;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -87,6 +86,7 @@ public class RawSocketHotelServer {
                         outPutPrintWriter.println("HTTP/1.1 400 Bad Request");
                         System.out.println("HTTP/1.1 400 Bad Request: " + e);
                         outPutPrintWriter.flush();
+                        outPutPrintWriter.close();
                         return;
                     }
 
@@ -95,28 +95,27 @@ public class RawSocketHotelServer {
                         outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
                         System.out.println("405 Method Not Allowed: " + httpRequest.getAction());
                         outPutPrintWriter.flush();
+                        outPutPrintWriter.close();
                         return;
                     }
 
-                    if (!handlers.containsKey(httpRequest.getAction().replace("/", ""))) {
+                    if (!handlers.containsKey(httpRequest.getAction())) {
                         outPutPrintWriter.println("HTTP/1.1 404 Page Not Found");
                         System.out.println("404 Page Not Found");
                         System.out.println(httpRequest.getAction());
                         outPutPrintWriter.flush();
+                        outPutPrintWriter.close();
                         return;
                     }
                     try {
-                        System.out.println("HI");
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
                         HttpHandler httpHandler = (HttpHandler) c.newInstance();
-                        outPutPrintWriter.print("HTTP/1.1 200 \r\n"); // Version & status code
-                        outPutPrintWriter.print("Content-Type: application/json\r\n"); // The type of data
-                        outPutPrintWriter.print("Connection: close\r\n"); // Will close stream
-                        outPutPrintWriter.print("\r\n"); // End of headers
+                        outPutPrintWriter.print("HTTP/1.1 200 OK\nContent-Type: application/json; charset=UTF-8\nConnection: close\n\n");
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
                         outPutPrintWriter.println();
                         outPutPrintWriter.flush();
                         System.out.println("Success");
+                        return;
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                         System.out.println(e);
                     } catch (Exception e) {

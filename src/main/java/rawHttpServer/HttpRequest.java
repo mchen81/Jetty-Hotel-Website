@@ -49,7 +49,7 @@ public class HttpRequest {
         Matcher urlMatcher = urlPattern.matcher(urlRequest);
 
         if (urlMatcher.find()) {
-            action = urlMatcher.group(1);
+            action = urlMatcher.group(1).replace("/", "");
             String parameters = urlMatcher.group(2);
             parseParametersToMap(parameters);
         } else {

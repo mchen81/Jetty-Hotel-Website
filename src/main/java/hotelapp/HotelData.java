@@ -15,7 +15,7 @@ public class HotelData {
 
     protected Map<String, Hotel> hotelsBook;
 
-    protected Map<String, TreeSet<Review>> reviewsBook;
+    protected Map<String, List<Review>> reviewsBook;
 
     protected Set<String> hotels;
 
@@ -112,7 +112,7 @@ public class HotelData {
             reviewInfo.setSubmissionTime(date);
             reviewInfo.setUserNickname(username);
             if (!reviewsBook.containsKey(hotelId)) {
-                reviewsBook.put(hotelId, new TreeSet<>(Comparator.naturalOrder()));
+                reviewsBook.put(hotelId, new ArrayList<>());
             }
             reviewsBook.get(hotelId).add(reviewInfo);
         } catch (InvalidRatingException e) {
@@ -143,7 +143,7 @@ public class HotelData {
             reviewInfo.setSubmissionTime(review.getSubmissionTime());
             reviewInfo.setUserNickname(review.getUserNickname());
             if (!reviewsBook.containsKey(review.getHotelId())) {
-                reviewsBook.put(review.getHotelId(), new TreeSet<>(Comparator.naturalOrder()));
+                reviewsBook.put(review.getHotelId(), new ArrayList<>());
             }
             reviewsBook.get(review.getHotelId()).add(reviewInfo);
         } catch (InvalidRatingException e) {
@@ -161,7 +161,7 @@ public class HotelData {
      */
     public boolean addAllReviews(String hotelId, List<Review> reviews) {
         if (!reviewsBook.containsKey(hotelId)) {
-            reviewsBook.put(hotelId, new TreeSet<>(Comparator.naturalOrder()));
+            reviewsBook.put(hotelId, new ArrayList<>());
         }
         reviewsBook.get(hotelId).addAll(reviews);
         return true;
@@ -217,7 +217,7 @@ public class HotelData {
         result.append(hotel.getStreetAddress());
         result.append("\n");
         result.append(String.format("%s, %s\n", hotel.getCity(), hotel.getState()));
-        TreeSet<Review> reviews = reviewsBook.get(hotelId);
+        List<Review> reviews = reviewsBook.get(hotelId);
         if (reviews == null || reviews.size() == 0) {
             return result.toString();
         } else {
