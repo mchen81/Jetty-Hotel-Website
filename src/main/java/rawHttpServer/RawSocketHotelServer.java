@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
  */
 public class RawSocketHotelServer {
 
-    public static final int PORT = 5556;
+    public static final int PORT = 8080;
     public static final String EOT = "EOT";
     public static final String EXIT = "SHUTDOWN";
 
