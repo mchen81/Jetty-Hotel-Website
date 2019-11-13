@@ -19,7 +19,7 @@ public class TouristAttractionFinder {
     private static final String host = "https://maps.googleapis.com";
     private static final String path = "/maps/api/place/textsearch/json";
 
-    private String myGoogleAPI;
+    private static String myGoogleAPI;
 
     private ThreadSafeHotelData hdata;
     // Add instance variables as needed (for example, store a reference to ThreadSafeHotelData)
@@ -32,7 +32,6 @@ public class TouristAttractionFinder {
      * @param hdata
      */
     public TouristAttractionFinder(ThreadSafeHotelData hdata) {
-        parseConfigFile("input/config.json");
         this.hdata = hdata;
     }
 
@@ -157,22 +156,23 @@ public class TouristAttractionFinder {
      *
      * @param configFilePath the path of config file
      */
-    public void parseConfigFile(String configFilePath) {
+    public static void parseConfigFile(String configFilePath) throws IOException {
         Path configPath = Paths.get(configFilePath);
-        try {
-            JsonReader jsonReader = new JsonReader(new FileReader(configPath.toString()));
-            jsonReader.beginObject();
-            while (jsonReader.hasNext()) {
-                String key = jsonReader.nextName();
-                if (key.equals("apikey")) {
-                    myGoogleAPI = jsonReader.nextString();
-                } else {
-                    jsonReader.skipValue();
-                }
+        JsonReader jsonReader = new JsonReader(new FileReader(configPath.toString()));
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            String key = jsonReader.nextName();
+            if (key.equals("apikey")) {
+                myGoogleAPI = jsonReader.nextString();
+            } else {
+                jsonReader.skipValue();
             }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot find config file: Default Path: input/config.json");
         }
+
+        if (myGoogleAPI == null || myGoogleAPI.isEmpty()) {
+            throw new IllegalArgumentException("Please provide correct Google API");
+        }
+
     }
 
 

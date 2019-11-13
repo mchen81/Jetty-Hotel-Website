@@ -54,7 +54,7 @@ public class HotelDataBuilder {
      *
      * @param jsonFilename
      */
-    public void loadHotelInfo(String jsonFilename) {
+    public void loadHotelInfo(String jsonFilename) throws IOException {
         parseHotel(jsonFilename);
     }
 
@@ -65,7 +65,7 @@ public class HotelDataBuilder {
      *
      * @param dir
      */
-    public void loadReviews(Path dir) {
+    public void loadReviews(Path dir) throws IOException {
         List<String> files = readDir(dir.toString());
         for (String filepath : files) {
             executor.execute(new ReviewParser(filepath));
@@ -168,22 +168,19 @@ public class HotelDataBuilder {
      * @param dir the path of a dir
      * @return a string list of json file paths
      */
-    private List<String> readDir(String dir) {
+    private List<String> readDir(String dir) throws IOException {
         Path dirPath = Paths.get(dir);
         // for return
         List<String> filePaths = new ArrayList<>();
         // get json files in the directory and add it int to a list
-        try {
-            DirectoryStream<Path> filesList = Files.newDirectoryStream(dirPath);
-            for (Path p : filesList) {
-                if (p.toString().endsWith(".json")) {
-                    filePaths.add(p.toString());
-                } else if (Files.isDirectory(p)) {
-                    filePaths.addAll(readDir(p.toString()));
-                }
+
+        DirectoryStream<Path> filesList = Files.newDirectoryStream(dirPath);
+        for (Path p : filesList) {
+            if (p.toString().endsWith(".json")) {
+                filePaths.add(p.toString());
+            } else if (Files.isDirectory(p)) {
+                filePaths.addAll(readDir(p.toString()));
             }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot find review json file");
         }
         return filePaths;
     }
@@ -193,67 +190,64 @@ public class HotelDataBuilder {
      *
      * @param filePath file's path
      */
-    private void parseHotel(String filePath) {
-        try (JsonReader jsonReader = new JsonReader(new FileReader(filePath))) {
-            // first object in json
-            jsonReader.beginObject();
-            while (jsonReader.hasNext()) {
-                // json key
-                String name = jsonReader.nextName();
-                // we just need hotels info in the array of key "sr"
-                if (name.equals("sr")) {
-                    // begin array
-                    jsonReader.beginArray();
-                    while (jsonReader.hasNext()) { // for each hotel in the array
-                        // begin "real" hotel json object
-                        jsonReader.beginObject();
-                        Hotel hotel = new Hotel();
-                        while (jsonReader.hasNext()) { // for hotel info
-                            String hotelInfo = jsonReader.nextName();
-                            switch (hotelInfo) {
-                                case "id":
-                                    hotel.setHotelId(jsonReader.nextString());
-                                    break;
-                                case "f":
-                                    hotel.setName(jsonReader.nextString());
-                                    break;
-                                case "ad":
-                                    hotel.setStreetAddress(jsonReader.nextString());
-                                    break;
-                                case "ci":
-                                    hotel.setCity(jsonReader.nextString());
-                                    break;
-                                case "pr":
-                                    hotel.setState(jsonReader.nextString());
-                                    break;
-                                case "ll": // for setting latitude and longitude
-                                    jsonReader.beginObject(); // open coordinate object
-                                    while (jsonReader.hasNext()) {
-                                        String coordinate = jsonReader.nextName();
-                                        if (coordinate.equals("lat")) {
-                                            hotel.setLatitude(Double.valueOf(jsonReader.nextString()));
-                                        } else if (coordinate.equals("lng")) {
-                                            hotel.setLongitude(Double.valueOf(jsonReader.nextString()));
-                                        } else {
-                                            jsonReader.skipValue();
-                                        }
+    private void parseHotel(String filePath) throws IOException {
+        JsonReader jsonReader = new JsonReader(new FileReader(filePath));
+        // first object in json
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            // json key
+            String name = jsonReader.nextName();
+            // we just need hotels info in the array of key "sr"
+            if (name.equals("sr")) {
+                // begin array
+                jsonReader.beginArray();
+                while (jsonReader.hasNext()) { // for each hotel in the array
+                    // begin "real" hotel json object
+                    jsonReader.beginObject();
+                    Hotel hotel = new Hotel();
+                    while (jsonReader.hasNext()) { // for hotel info
+                        String hotelInfo = jsonReader.nextName();
+                        switch (hotelInfo) {
+                            case "id":
+                                hotel.setHotelId(jsonReader.nextString());
+                                break;
+                            case "f":
+                                hotel.setName(jsonReader.nextString());
+                                break;
+                            case "ad":
+                                hotel.setStreetAddress(jsonReader.nextString());
+                                break;
+                            case "ci":
+                                hotel.setCity(jsonReader.nextString());
+                                break;
+                            case "pr":
+                                hotel.setState(jsonReader.nextString());
+                                break;
+                            case "ll": // for setting latitude and longitude
+                                jsonReader.beginObject(); // open coordinate object
+                                while (jsonReader.hasNext()) {
+                                    String coordinate = jsonReader.nextName();
+                                    if (coordinate.equals("lat")) {
+                                        hotel.setLatitude(Double.valueOf(jsonReader.nextString()));
+                                    } else if (coordinate.equals("lng")) {
+                                        hotel.setLongitude(Double.valueOf(jsonReader.nextString()));
+                                    } else {
+                                        jsonReader.skipValue();
                                     }
-                                    jsonReader.endObject(); // close coordinate object
-                                    break;
-                                default:
-                                    jsonReader.skipValue();
-                            }
+                                }
+                                jsonReader.endObject(); // close coordinate object
+                                break;
+                            default:
+                                jsonReader.skipValue();
                         }
-                        jsonReader.endObject(); // end hotels object
-                        // put hotel-Id and hotel object to the map
-                        hdata.addHotel(hotel);
                     }
-                } else { // skip value except "sr"
-                    jsonReader.skipValue();
+                    jsonReader.endObject(); // end hotels object
+                    // put hotel-Id and hotel object to the map
+                    hdata.addHotel(hotel);
                 }
+            } else { // skip value except "sr"
+                jsonReader.skipValue();
             }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot find the hotel file");
         }
     }
 
