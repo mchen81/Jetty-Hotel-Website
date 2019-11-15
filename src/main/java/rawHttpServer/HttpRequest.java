@@ -13,47 +13,62 @@ import java.util.regex.Pattern;
 public class HttpRequest {
     // FILL IN CODE
     // Store parameters of the request
+    /**
+     * A String contains all http request: GET /action?parameters HTTP/1.1
+     */
     private String httpRequest;
-
+    /**
+     * A String contains request: action?parameters
+     */
     private String urlRequest;
-
+    /**
+     * key as parameter's name, value is the value of parameter
+     */
     private Map<String, String> parameterMap;
-
+    /**
+     * represent the query action: hotelInfo, reviews, attractions
+     */
     private String action = null;
 
+    /**
+     * HTTP's CRUD : GET, POST ....
+     */
     private String httpCRUD = null;
 
+    /**
+     * @param httpRequest A String like: GET /action?parameters HTTP/1.1
+     */
     public HttpRequest(String httpRequest) {
         this.httpRequest = httpRequest;
         parameterMap = new HashMap<>();
         parseHttpRequest();
     }
 
+    /**
+     * parse httpRequest and store the elements in this class
+     */
     private void parseHttpRequest() {
-        Pattern requestPattern = Pattern.compile("([A-Za-z]*?) (.*) (\\/?HTTP\\/1.1.*)");
-        Matcher requestMatcher = requestPattern.matcher(httpRequest);
-
-        if (requestMatcher.find()) {
-            httpCRUD = requestMatcher.group(1);
-            urlRequest = requestMatcher.group(2);
+        String[] request = httpRequest.split(" ");
+        if (request.length == 3) {
+            httpCRUD = request[0];
+            urlRequest = request[1];
             parseUrlRequest();
         } else {
-            throw new HttpRequestParingException("Cannot Parse HTTP Request" + httpRequest);
+            throw new HttpRequestParingException("Cannot Parse HTTP Request: " + httpRequest, 404);
         }
 
     }
 
     private void parseUrlRequest() {
-        String urlRegex = "(.*?)\\?(.*)";
-        Pattern urlPattern = Pattern.compile(urlRegex);
-        Matcher urlMatcher = urlPattern.matcher(urlRequest);
-
-        if (urlMatcher.find()) {
-            action = urlMatcher.group(1).replace("/", "");
-            String parameters = urlMatcher.group(2);
+        String[] query = urlRequest.split("\\?");
+        if (query.length == 2) {
+            action = query[0].replace("/", "");
+            String parameters = query[1];
             parseParametersToMap(parameters);
+        } else if (query.length == 1) {
+            action = query[0].replace("/", "");
         } else {
-            throw new HttpRequestParingException("Cannot Parse Action");
+            throw new HttpRequestParingException("Cannot Parse query request: " + urlRequest, 405);
         }
 
     }
@@ -65,7 +80,7 @@ public class HttpRequest {
             try {
                 parameterMap.put(map[0], map[1]);
             } catch (IndexOutOfBoundsException e) {
-                throw new HttpRequestParingException("Cannot parse query request");
+                throw new HttpRequestParingException("Cannot parse parameters: " + parameters, 405);
             }
 
         }

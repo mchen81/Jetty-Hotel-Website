@@ -6,25 +6,30 @@ import hotelapp.ThreadSafeHotelData;
 import hotelapp.bean.Hotel;
 import rawHttpServer.HttpHandler;
 import rawHttpServer.HttpRequest;
-import rawHttpServer.RawSocketHotelServer;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * Handler for /hotelInfo
+ */
 public class HotelHandler implements HttpHandler {
 
     @Override
     public void processRequest(HttpRequest request, PrintWriter writer) {
         ThreadSafeHotelData hotelData = HotelDataDriver.hotelData;
 
-        Hotel hotel = hotelData.getHotelInstance(request.getValue("hotelId"));
+
+        String hotelId = request.getValue("hotelId");
+        hotelId = hotelId == null ? "-1" : hotelId;
+        Hotel hotel = hotelData.getHotelInstance(hotelId);
 
         JsonWriter jsonWriter = new JsonWriter(writer);
         try {
             jsonWriter.beginObject();
             if (hotel == null) {
                 jsonWriter.name("success").value(false);
-                jsonWriter.name("hotelId").value("Invalid");
+                jsonWriter.name("hotelId").value("invalid");
             } else {
                 jsonWriter.name("success").value(true);
                 jsonWriter.name("hotelId").value(hotel.getHotelId());

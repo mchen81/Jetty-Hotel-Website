@@ -17,8 +17,6 @@ import java.util.concurrent.Executors;
 public class RawSocketHotelServer {
 
     public static final int PORT = 8080;
-    public static final String EOT = "EOT";
-    public static final String EXIT = "SHUTDOWN";
 
     private Map<String, String> handlers; // maps each url path to the appropriate handler
 
@@ -83,8 +81,8 @@ public class RawSocketHotelServer {
                     try {
                         httpRequest = new HttpRequest(httpRequestString);
                     } catch (HttpRequestParingException e) {
-                        outPutPrintWriter.println("HTTP/1.1 400 Bad Request");
-                        System.out.println("HTTP/1.1 400 Bad Request: " + e);
+                        outPutPrintWriter.print(e.getHttpResponse());
+                        System.out.println(e);
                         outPutPrintWriter.flush();
                         outPutPrintWriter.close();
                         return;
@@ -92,21 +90,21 @@ public class RawSocketHotelServer {
 
                     if (!"GET".equals(httpRequest.getHttpCRUD())) {
                         // return 405 Method Not Allowed
-                        outPutPrintWriter.println("HTTP/1.1 405 Method Not Allowed");
-                        System.out.println("405 Method Not Allowed: " + httpRequest.getAction());
+                        outPutPrintWriter.print("HTTP/1.1 405 Method Not Allowed\n");
+                        System.out.println("405 Method Not Allowed: " + httpRequestString);
                         outPutPrintWriter.flush();
                         outPutPrintWriter.close();
                         return;
                     }
 
                     if (!handlers.containsKey(httpRequest.getAction())) {
-                        outPutPrintWriter.println("HTTP/1.1 404 Page Not Found");
-                        System.out.println("404 Page Not Found");
-                        System.out.println(httpRequest.getAction());
+                        outPutPrintWriter.print("HTTP/1.1 404 Page Not Found\n");
+                        System.out.println("404 Page Not Found: " + httpRequestString);
                         outPutPrintWriter.flush();
                         outPutPrintWriter.close();
                         return;
                     }
+
                     try {
                         Class c = Class.forName(handlers.get(httpRequest.getAction()));
                         HttpHandler httpHandler = (HttpHandler) c.newInstance();
