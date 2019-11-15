@@ -14,6 +14,9 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Servlet for reviews
+ */
 public class ReviewsServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -25,11 +28,11 @@ public class ReviewsServlet extends HttpServlet {
         String hotelID = request.getParameter("hotelId");
         hotelID = hotelID == null ? "-1" : StringEscapeUtils.escapeHtml4(hotelID);
 
-        int numbersOfReview = 0;
-        try {
+        int numbersOfReview;
+        try { // if the parameter of num cannot be transformed to int, set it -1
             numbersOfReview = Integer.parseInt(request.getParameter("num"));
-        } catch (NumberFormatException e) {
-            numbersOfReview = 0;
+        } catch (Exception e) {
+            numbersOfReview = -1;
         }
 
         List<Review> reviews = hotelData.getReviews(hotelID);
@@ -37,9 +40,9 @@ public class ReviewsServlet extends HttpServlet {
 
         try {
             jsonWriter.beginObject();
-            if (reviews == null) {
+            if (reviews == null || numbersOfReview < 0) {
                 jsonWriter.name("success").value(false);
-                jsonWriter.name("hotelId").value("Invalid");
+                jsonWriter.name("hotelId").value("invalid");
             } else {
                 jsonWriter.name("success").value(true);
                 jsonWriter.name("hotelId").value(hotelID);
@@ -48,9 +51,9 @@ public class ReviewsServlet extends HttpServlet {
                     Review review = reviews.get(i);
                     LocalDateTime reviewDate = review.getSubmissionTime();
                     String month = String.valueOf(reviewDate.getMonth().getValue());
-                    month = month.length() == 1 ? "0" + month : month;
+                    month = month.length() == 1 ? "0" + month : month; // ensure output 2 digits
                     String day = String.valueOf(reviewDate.getDayOfMonth());
-                    day = day.length() == 1 ? "0" + day : day;
+                    day = day.length() == 1 ? "0" + day : day; // ensure output 2 digits
                     String year = String.valueOf(reviewDate.getYear()).substring(2, 4);
 
                     jsonWriter.beginObject();

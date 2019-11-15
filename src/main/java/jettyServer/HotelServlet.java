@@ -12,6 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * Servlet for /hotelInfo
+ */
 public class HotelServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -30,7 +33,7 @@ public class HotelServlet extends HttpServlet {
             jsonWriter.beginObject();
             if (hotel == null) {
                 jsonWriter.name("success").value(false);
-                jsonWriter.name("hotelId").value("Invalid");
+                jsonWriter.name("hotelId").value("invalid");
             } else {
                 jsonWriter.name("success").value(true);
                 jsonWriter.name("hotelId").value(hotel.getHotelId());
