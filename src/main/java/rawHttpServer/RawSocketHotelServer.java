@@ -41,7 +41,7 @@ public class RawSocketHotelServer {
                     System.out.println("Waiting for clients to connect...");
                     while (!isShutdown) {
                         Socket clientSocket = welcomingSocket.accept();
-                        System.out.println("Connecting Successful");
+                        System.out.print("A Client Connected: ");
                         threads.submit(new RequestWorker(clientSocket));
                     }
                     if (isShutdown) {
@@ -91,7 +91,7 @@ public class RawSocketHotelServer {
                     if (!"GET".equals(httpRequest.getHttpCRUD())) {
                         // return 405 Method Not Allowed
                         outPutPrintWriter.print("HTTP/1.1 405 Method Not Allowed\n");
-                        System.out.println("405 Method Not Allowed: " + httpRequestString);
+                        System.out.println("Request fail: 405 Method Not Allowed: " + httpRequestString);
                         outPutPrintWriter.flush();
                         outPutPrintWriter.close();
                         return;
@@ -99,7 +99,7 @@ public class RawSocketHotelServer {
 
                     if (!handlers.containsKey(httpRequest.getAction())) {
                         outPutPrintWriter.print("HTTP/1.1 404 Page Not Found\n");
-                        System.out.println("404 Page Not Found: " + httpRequestString);
+                        System.out.println("Request fail: 404 Page Not Found: " + httpRequestString);
                         outPutPrintWriter.flush();
                         outPutPrintWriter.close();
                         return;
@@ -112,7 +112,7 @@ public class RawSocketHotelServer {
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
                         outPutPrintWriter.println();
                         outPutPrintWriter.flush();
-                        System.out.println("Success");
+                        System.out.println("Request success: " + httpRequest);
                         return;
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                         System.out.println(e);
