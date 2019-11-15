@@ -112,7 +112,7 @@ public class RawSocketHotelServer {
                         httpHandler.processRequest(httpRequest, outPutPrintWriter);
                         outPutPrintWriter.println();
                         outPutPrintWriter.flush();
-                        System.out.println("Request success: " + httpRequest);
+                        System.out.println("Request success: " + httpRequestString);
                         return;
                     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                         System.out.println(e);
