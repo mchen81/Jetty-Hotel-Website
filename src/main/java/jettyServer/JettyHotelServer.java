@@ -9,7 +9,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 public class JettyHotelServer {
     // FILL IN CODE
 
-    public static final int PORT = 8084;
+    public static final int PORT = 8090;
 
     public JettyHotelServer() throws Exception {
         Server server = new Server(PORT);
