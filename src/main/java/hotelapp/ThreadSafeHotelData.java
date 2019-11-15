@@ -5,7 +5,6 @@ import customLock.ReentrantReadWriteLock;
 import hotelapp.bean.Hotel;
 import hotelapp.bean.Review;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +23,7 @@ public class ThreadSafeHotelData extends HotelData {
         super();
         lock = new ReentrantReadWriteLock();
     }
+
 
     /**
      * Overrides addHotel method from HotelData class to make it thread-safe; uses the lock.
@@ -162,26 +162,6 @@ public class ThreadSafeHotelData extends HotelData {
         }
     }
 
-    /**
-     * Overrides the method printToFile of the parent class to make it thread-safe.
-     * Save the string representation of the hotel data to the file specified by
-     * filename in the following format: an empty line A line of 20 asterisks
-     * ******************** on the next line information for each hotel, printed
-     * in the format described in the toString method of this class.
-     * <p>
-     * The hotels should be sorted by hotel ids
-     *
-     * @param filename - Path specifying where to save the output.
-     */
-    @Override
-    public void printToFile(Path filename) {
-        try {
-            lock.lockRead();
-            super.printToFile(filename);
-        } finally {
-            lock.unlockRead();
-        }
-    }
 
     /**
      * Overrides a method of the parent class to make it thread-safe.

@@ -86,7 +86,6 @@ public class HotelDataBuilder {
      */
     private List<Review> parseSingleReviewJsonFile(String filePath) {
         List<Review> result = new ArrayList<>();
-        String hotelId = "";
         try (JsonReader jsonReader = new JsonReader(new FileReader(filePath))) {
             jsonReader.beginObject(); // begin first json object (start with reviewDetails)
             while (jsonReader.hasNext()) {
@@ -252,13 +251,8 @@ public class HotelDataBuilder {
     }
 
     /**
-     * Prints all hotel info to the file. Calls hdata's printToFile method.
+     * a thread worker for paring reviews
      */
-    public void printToFile(Path filename) {
-        hdata.printToFile(filename);
-    }
-
-    // FILL IN CODE: add an inner class and other methods as needed
     class ReviewParser implements Runnable {
         private String filePath;
 

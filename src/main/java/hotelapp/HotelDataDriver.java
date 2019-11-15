@@ -16,16 +16,16 @@ public class HotelDataDriver {
         // prepare hotel data
         Map<String, String> commands = parseArgs(args);
         if (!commands.containsKey("-hotels") || !commands.containsKey("-reviews") || !commands.containsKey("-config")) {
-            throw new IllegalArgumentException("Wrong Arguments, please give the path of hotels and reviews");
+            throw new IllegalArgumentException("Wrong Arguments, please give the json file path of hotels, reviews and config");
         }
         HotelDataDriver.prepareHotelData(commands);
         TouristAttractionFinder.parseConfigFile(commands.get("-config"));
 
         System.out.println("====================WELCOME=====================");
-        System.out.println("Files Loaded");
+        System.out.println("Files Loaded Successfully");
         System.out.println("JettyHotelServer's Port is " + JettyHotelServer.PORT);
         System.out.println("RawSocketHotelServer's Port is " + RawSocketHotelServer.PORT);
-        System.out.println("Provide 3 query functions: ");
+        System.out.println("Provide 3 query request: ");
         System.out.println("EXAMPLE: ");
         System.out.println("/hotelInfo?hotelId=12345");
         System.out.println("/reviews?hotelId=12345&num=2");
@@ -61,6 +61,10 @@ public class HotelDataDriver {
             result.put(args[i], args[i + 1]);
         }
         return result;
+    }
+
+    public ThreadSafeHotelData getHotelData() {
+        return new ThreadSafeHotelData();
     }
 
 

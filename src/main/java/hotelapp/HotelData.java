@@ -3,12 +3,8 @@ package hotelapp;
 import hotelapp.bean.Hotel;
 import hotelapp.bean.Review;
 import hotelapp.exceptions.InvalidRatingException;
-import hotelapp.exceptions.NoHotelFoundException;
 import hotelapp.exceptions.ParseException;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Path;
 import java.util.*;
 
 public class HotelData {
@@ -31,7 +27,6 @@ public class HotelData {
         hotels = new TreeSet<>((o1, o2) -> o1.compareTo(o2));
         aboutThisArea = new HashMap<>();
     }
-
 
     /**
      * @param hotelId hotel id
@@ -167,28 +162,6 @@ public class HotelData {
         return true;
     }
 
-    /**
-     * Save the string representation of the hotel data to the file specified by
-     * filename in the following format: an empty line A line of 20 asterisks
-     * ******************** on the next line information for each hotel, printed
-     * in the format described in the toString method of this class.
-     * <p>
-     * The hotels should be sorted by hotel ids
-     *
-     * @param filename - Path specifying where to save the output.
-     */
-    public void printToFile(Path filename) {
-        try (PrintWriter pw = new PrintWriter(filename.toFile())) {
-            pw.println();
-            for (String hotelId : hotels) {
-                pw.println("********************");
-                pw.println(toString(hotelId));
-            }
-            pw.close();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getCause());
-        }
-    }
 
     /**
      * Returns a string representing information about the hotel with the given
