@@ -1,5 +1,4 @@
-# Project 6: RESTful API Servers 
-
+RESTful API Servers  
 Application Description: 
 - Two servers are on the same jar file(project6Servers.jar)
 - Both servers will start together if arguments are correct
